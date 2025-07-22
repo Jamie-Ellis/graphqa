@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""
+GraphQA Automated Setup Script
+Wrapper around quickstart.py for automated installation
+"""
+
+import subprocess
+import sys
+
+if __name__ == "__main__":
+    # Call quickstart.py in automated mode
+    try:
+        subprocess.check_call([sys.executable, "quickstart.py", "--auto", "--venv"])
+    except subprocess.CalledProcessError:
+        sys.exit(1) 

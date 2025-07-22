@@ -8,11 +8,19 @@ import os
 import logging
 import warnings
 from typing import Optional
-from langfuse import Langfuse, get_client
-from langfuse.langchain import CallbackHandler
 
-# Suppress OpenTelemetry span warnings from Langfuse integration
-warnings.filterwarnings("ignore", "Calling end() on an ended span", module="opentelemetry.sdk.trace")
+# Try to import Langfuse - if not available, observability will be disabled
+try:
+    from langfuse import Langfuse, get_client
+    from langfuse.langchain import CallbackHandler
+    LANGFUSE_AVAILABLE = True
+    # Suppress OpenTelemetry span warnings from Langfuse integration
+    warnings.filterwarnings("ignore", "Calling end() on an ended span", module="opentelemetry.sdk.trace")
+except ImportError:
+    LANGFUSE_AVAILABLE = False
+    Langfuse = None
+    get_client = None
+    CallbackHandler = None
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +42,10 @@ class UniversalObservability:
         self.enabled = False
         self.handler = None
         self.client = None
+        
+        if not LANGFUSE_AVAILABLE:
+            logger.info("📊 Langfuse not available - observability disabled (install with: pip install langfuse)")
+            return
         
         try:
             # Setup Langfuse client

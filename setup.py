@@ -7,8 +7,21 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+# Dependencies defined here for backward compatibility
+# Primary dependency definition is in pyproject.toml
+requirements = [
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0", 
+    "langchain-community>=0.3.0",
+    "networkx>=3.0",
+    "numpy>=1.24.0",
+    "pandas>=1.5.0",
+    "scikit-learn>=1.3.0",
+    "sentence-transformers>=3.0.0",
+    "faiss-cpu>=1.7.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+]
 
 setup(
     name="graphqa",

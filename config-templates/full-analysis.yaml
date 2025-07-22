@@ -1,0 +1,42 @@
+# GraphQA Full Analysis Configuration  
+# ===================================
+# Complete dataset loading for research and production analysis
+# Loads ~200K+ products in 2-5 minutes using ~2GB RAM
+
+datasets:
+  amazon_products:
+    name: "Amazon Products"
+    description: "Amazon product catalog and recommendation networks"
+    loader_class: "AmazonProductLoader"
+    enabled: true
+    config:
+      metadata_file: "data/datasets/amazon/meta_electronics_2018.json.gz"
+      reviews_file: "data/datasets/amazon/reviews_electronics_2018.json.gz"
+      
+      # FULL ANALYSIS SETTINGS - Complete Dataset
+      test_mode: false
+      max_products: null    # Load all ~200,000+ products
+      max_reviews: null     # Load all ~1,000,000+ reviews
+      validate_data: true
+
+# Tool Configuration
+tools:
+  enabled: true
+  max_results: 100
+  cache_enabled: true
+  performance_mode: "thorough"
+
+# LLM Configuration  
+llm:
+  model: "gpt-4"
+  temperature: 0.1
+  max_tokens: 4000
+  timeout_seconds: 60
+
+# Performance & Resource Limits
+performance:
+  max_graph_size: 500000
+  max_memory_mb: 4096
+  parallel_processing: true
+  cache_directory: "data/cache"
+  log_level: "INFO" 

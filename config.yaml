@@ -1,0 +1,75 @@
+# GraphQA Configuration File
+# ===========================
+# This file controls how GraphQA loads and processes datasets.
+# Edit these settings to customize behavior for your needs.
+
+# Dataset Configurations
+datasets:
+  amazon_products:
+    name: "Amazon Products"
+    description: "Amazon product catalog and recommendation networks"
+    loader_class: "AmazonProductLoader"
+    enabled: true
+    config:
+      # Data file paths (relative to project root)
+      metadata_file: "data/datasets/amazon/meta_electronics_2018.json.gz"
+      reviews_file: "data/datasets/amazon/reviews_electronics_2018.json.gz"
+      
+      # Performance Settings
+      # ====================
+      # We ship in TEST MODE by default to prevent memory/CPU overload
+      # Set test_mode: false for full dataset (requires 1-2GB RAM, 2-5 min load time)
+      test_mode: false
+      
+      # Limits (set to null for unlimited when test_mode: false)
+      max_products: null    # Full dataset: ~200,000+ products  
+      max_reviews: null     # Full dataset: ~1,000,000+ reviews
+      
+      # Data validation
+      validate_data: true
+    
+    # Expected data sources (for validation)
+    data_sources:
+      - "data/datasets/amazon/meta_electronics_2018.json.gz"
+      - "data/datasets/amazon/reviews_electronics_2018.json.gz"
+
+
+# Tool Configuration
+tools:
+  enabled: true
+  max_results: 50
+  cache_enabled: true
+  performance_mode: "balanced"  # Options: fast, balanced, thorough
+
+# LLM Configuration  
+llm:
+  model: "gpt-4"
+  temperature: 0.1
+  max_tokens: 2000
+  timeout_seconds: 30
+  max_iterations: 4      # Agent reasoning steps before stopping (increase for complex questions)
+
+# Performance & Resource Limits
+performance:
+  max_graph_size: 100000      # Maximum nodes to prevent memory issues
+  max_memory_mb: 2048         # Memory limit in MB
+  parallel_processing: true   # Enable parallel processing where possible
+  cache_directory: "data/cache"
+  log_level: "INFO"           # DEBUG, INFO, WARNING, ERROR
+
+# Quick Settings for Common Use Cases
+# ====================================
+# 
+# 🚀 For DEMO/TESTING (current default):
+#   amazon_products.config.test_mode: true
+#   amazon_products.config.max_products: 5000
+#   
+# 🔥 For FULL ANALYSIS (requires more resources):  
+#   amazon_products.config.test_mode: false
+#   amazon_products.config.max_products: null
+#   amazon_products.config.max_reviews: null
+#
+# ⚡ For CUSTOM LIMITS:
+#   amazon_products.config.test_mode: false  
+#   amazon_products.config.max_products: 25000  # Custom limit
+#   amazon_products.config.max_reviews: 50000   # Custom limit 

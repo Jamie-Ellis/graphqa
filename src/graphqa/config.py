@@ -4,11 +4,21 @@ Configuration system for Universal Graph Retriever
 Provides centralized configuration management for datasets, tools, and system settings.
 """
 
+import os
 import yaml
 import logging
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
+
+# Load .env file if it exists
+try:
+    from dotenv import load_dotenv
+    # Look for .env file in current directory and parent directories
+    load_dotenv(override=False)  # Don't override existing env vars
+except ImportError:
+    # python-dotenv not installed, skip .env loading
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +50,7 @@ class LLMConfig:
     temperature: float = 0.1
     max_tokens: int = 2000
     timeout_seconds: int = 30
+    max_iterations: int = 4  # Agent reasoning iterations before stopping
 
 
 @dataclass
@@ -119,7 +130,8 @@ class UniversalRetrieverConfig:
                 model=llm_config.get('model', 'o3-mini'),
                 temperature=llm_config.get('temperature', 0.1),
                 max_tokens=llm_config.get('max_tokens', 2000),
-                timeout_seconds=llm_config.get('timeout_seconds', 30)
+                timeout_seconds=llm_config.get('timeout_seconds', 30),
+                max_iterations=llm_config.get('max_iterations', 4)
             )
             
             # Load performance configuration

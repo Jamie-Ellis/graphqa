@@ -1,0 +1,43 @@
+# GraphQA Demo Configuration
+# ==========================
+# Fast loading for demos, presentations, and initial testing
+# Loads ~5K products in 10-30 seconds using ~200MB RAM
+
+datasets:
+  amazon_products:
+    name: "Amazon Products"
+    description: "Amazon product catalog and recommendation networks"
+    loader_class: "AmazonProductLoader"
+    enabled: true
+    config:
+      metadata_file: "data/datasets/amazon/meta_electronics_2018.json.gz"
+      reviews_file: "data/datasets/amazon/reviews_electronics_2018.json.gz"
+      
+      # DEMO SETTINGS - Fast & Safe
+      test_mode: true
+      max_products: 5000
+      max_reviews: 10000
+      validate_data: true
+
+# Tool Configuration
+tools:
+  enabled: true
+  max_results: 50
+  cache_enabled: true
+  performance_mode: "fast"
+
+# LLM Configuration  
+llm:
+  model: "gpt-4"
+  temperature: 0.1
+  max_tokens: 2000
+  timeout_seconds: 30
+  max_iterations: 10      # Quick responses for demos
+
+# Performance & Resource Limits
+performance:
+  max_graph_size: 50000
+  max_memory_mb: 1024
+  parallel_processing: true
+  cache_directory: "data/cache"
+  log_level: "INFO" 

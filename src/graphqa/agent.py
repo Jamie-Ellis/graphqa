@@ -58,6 +58,7 @@ class UniversalRetrievalAgent:
     def __init__(self, 
                  dataset_name: str = "amazon",
                  config: Optional[UniversalRetrieverConfig] = None,
+                 config_file: Optional[str] = None,
                  llm_model: str = "gpt-4o",  # Use GPT-4o with 128k context
                  temperature: float = 0.1,
                  verbose: bool = False):
@@ -66,13 +67,30 @@ class UniversalRetrievalAgent:
         
         Args:
             dataset_name: Name of dataset to load ("amazon", "architecture", etc.)
-            config: Configuration object (uses defaults if None)
+            config: Configuration object (takes precedence over config_file)
+            config_file: Path to YAML config file (default: look for config.yaml)
             llm_model: LLM model to use for natural language processing
             temperature: Temperature for LLM responses
             verbose: Enable verbose tool output display
         """
         self.dataset_name = dataset_name
-        self.config = config or UniversalRetrieverConfig()
+        
+        # Load configuration with priority: config > config_file > auto-detect > defaults
+        if config is not None:
+            self.config = config
+        elif config_file is not None:
+            self.config = UniversalRetrieverConfig(config_file)
+        else:
+            # Auto-detect config.yaml in current directory
+            from pathlib import Path
+            default_config = Path("config.yaml")
+            if default_config.exists():
+                logger.info(f"📋 Loading configuration from {default_config}")
+                self.config = UniversalRetrieverConfig(str(default_config))
+            else:
+                logger.info("📋 Using built-in default configuration")
+                self.config = UniversalRetrieverConfig()
+        
         self.verbose = verbose  # Add verbose mode for clean tool output
         self.graph = None
         self.schema = None
@@ -116,9 +134,9 @@ class UniversalRetrievalAgent:
             # Get dataset configuration
             dataset_config = self.config.get_dataset_config(self.dataset_name)
             if dataset_config is None:
-                # Use default configurations
+                # Use default configurations - preserved for backward compatibility
                 if self.dataset_name == "amazon":
-                    config_dict = {"test_mode": True}  # Faster loading for demo
+                    config_dict = {"test_mode": True}  # Safe default for unknown setups
                     loader = AmazonProductLoader(config_dict)
                 elif self.dataset_name == "architecture":
                     config_dict = {"architecture_file": "data/input/architecture_states/karate_test.json"}
@@ -127,9 +145,10 @@ class UniversalRetrievalAgent:
                     logger.error(f"Unknown dataset: {self.dataset_name}")
                     return False
             else:
+                # Use configuration from config file - respects user settings
                 config_dict = dataset_config.config.copy()
                 if self.dataset_name == "amazon":
-                    config_dict["test_mode"] = True  # Faster loading
+                    # No longer force test_mode - respect user's config.yaml settings
                     loader = AmazonProductLoader(config_dict)
                 elif self.dataset_name == "architecture":
                     # Provide default architecture file if not specified
@@ -390,7 +409,7 @@ Thought:{{agent_scratchpad}}"""
             memory=self.memory,
             verbose=True,  # Keep verbose to show agent thinking
             handle_parsing_errors=True,
-            max_iterations=4  # Reduced to force quicker conclusions
+            max_iterations=self.config.llm.max_iterations  # Configurable from config.yaml
         )
         
         logger.info("✅ Universal agent created successfully")

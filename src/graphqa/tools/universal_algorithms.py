@@ -222,8 +222,7 @@ All algorithm selection automatically adapts to your dataset size, structure, an
                     communities = nx_comm.louvain_communities(self.graph)
                     algorithms.append("louvain")
                     results["louvain"] = {
-                        "communities": [list(community) for community in communities],
-                        "community_count": len(communities),
+                        **self._summarize_communities(communities),
                         "modularity": nx_comm.modularity(self.graph, communities)
                     }
                 except:
@@ -235,8 +234,7 @@ All algorithm selection automatically adapts to your dataset size, structure, an
             communities = nx_comm.greedy_modularity_communities(self.graph)
             algorithms.append("greedy_modularity")
             results["greedy_modularity"] = {
-                "communities": [list(community) for community in communities],
-                "community_count": len(communities),
+                **self._summarize_communities(communities),
                 "modularity": nx_comm.modularity(self.graph, communities)
             }
         except:
@@ -248,10 +246,7 @@ All algorithm selection automatically adapts to your dataset size, structure, an
                 import networkx.algorithms.community as nx_comm
                 communities = nx_comm.label_propagation_communities(self.graph)
                 algorithms.append("label_propagation")
-                results["label_propagation"] = {
-                    "communities": [list(community) for community in communities],
-                    "community_count": len(communities)
-                }
+                results["label_propagation"] = self._summarize_communities(communities)
             except:
                 pass
         
@@ -260,6 +255,42 @@ All algorithm selection automatically adapts to your dataset size, structure, an
             "selected_algorithms": algorithms,
             "algorithm_results": results,
             "recommendation": self._get_community_recommendation(algorithms, results, characteristics)
+        }
+    
+    def _summarize_communities(self, communities) -> Dict[str, Any]:
+        """Smart summarization of community detection results to prevent token overflow"""
+        community_list = [list(community) for community in communities]
+        community_sizes = [len(community) for community in community_list]
+        
+        # Sort communities by size (largest first)
+        communities_with_sizes = list(zip(community_list, community_sizes))
+        communities_with_sizes.sort(key=lambda x: x[1], reverse=True)
+        
+        # Size distribution statistics
+        size_counts = {}
+        for size in community_sizes:
+            size_counts[size] = size_counts.get(size, 0) + 1
+        
+        # Smart sampling: show top 10 largest communities with limited members
+        sample_communities = []
+        for community, size in communities_with_sizes[:10]:
+            sample_communities.append({
+                "size": size,
+                "sample_members": community[:5],  # Show only first 5 members
+                "has_more": size > 5
+            })
+        
+        return {
+            "community_count": len(community_list),
+            "size_distribution": {
+                "largest_community": max(community_sizes) if community_sizes else 0,
+                "smallest_community": min(community_sizes) if community_sizes else 0,
+                "average_size": sum(community_sizes) / len(community_sizes) if community_sizes else 0,
+                "median_size": sorted(community_sizes)[len(community_sizes)//2] if community_sizes else 0
+            },
+            "sample_communities": sample_communities,
+            "total_communities_shown": min(10, len(community_list)),
+            "note": f"Showing top 10 largest communities out of {len(community_list)} total (with max 5 members each to prevent token overflow)"
         }
     
     def _select_influential_nodes(self, params: Dict[str, Any], preference: str, characteristics: Dict[str, Any]) -> Dict[str, Any]:
