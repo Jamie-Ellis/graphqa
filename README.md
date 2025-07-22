@@ -75,27 +75,13 @@ centrality = nx.pagerank(G)
 📊 Found 1,247 communities. Top nodes: B001, B002, B003...
 ```
 
-### 🎲 Universal Dataset Support
-
-GraphQA works with **any graph structure** because it's built on NetworkX:
-
-| Domain | Sample Questions |
-|--------|------------------|
-| **Social Networks** | "Who are the most connected users?" |
-| **Product Catalogs** | "Find products often bought together" |
-| **Cloud Architecture** | "Identify critical infrastructure components" |
-| **Knowledge Graphs** | "Find related concepts to machine learning" |
-| **Transportation** | "What's the shortest path between cities?" |
-
 ### 🧠 Schema-Agnostic Intelligence
 
 GraphQA makes **zero assumptions** about your data structure:
 
-- **🔍 Automatic Discovery**: 384-dimensional embeddings map attributes to semantic concepts
+- **🔍 Automatic Discovery**: embeddings map attributes to semantic concepts
 - **🤖 Contextual Understanding**: "expensive" automatically maps to price/cost attributes
 - **📊 Algorithm Adaptation**: Community detection parameters adjust to graph size/density
-- **🎯 Domain Transfer**: Skills learned on Amazon data work on social networks
-- **💡 Intelligent Suggestions**: Follow-up questions based on your specific dataset
 
 **The Result**: Whether you're analyzing protein interactions, supply chains, or social media networks, GraphQA provides the same powerful natural language interface backed by rigorous graph algorithms.
 

@@ -31,7 +31,7 @@ setup(
     description="Natural Language Graph Analysis Framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/graphqa/graphqa",
+    url="https://github.com/catio-tech/graphqa",
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     classifiers=[

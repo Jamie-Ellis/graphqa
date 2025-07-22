@@ -67,8 +67,8 @@ all = [
 graphqa = "graphqa.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/graphqa/graphqa"
-Repository = "https://github.com/graphqa/graphqa"
+Homepage = "https://github.com/catio-tech/graphqa"
+Repository = "https://github.com/catio-tech/graphqa"
 
 [tool.setuptools.packages.find]
 where = ["src"]
