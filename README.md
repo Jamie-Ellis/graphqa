@@ -3,7 +3,7 @@
 > **Ask questions about any graph in natural language - no SQL, no graph query languages, just plain English**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![LangChain](https://img.shields.io/badge/LangChain-Powered-green.svg)](https://langchain.com/)
 
 > **⚠️ Software Disclaimer**: GraphQA is provided "as is" without warranty of any kind. This is research/experimental software designed for graph analysis and exploration. Use at your own discretion and always validate results for production use cases.
@@ -927,7 +927,7 @@ isort src/
 
 ## 📄 License
 
-MIT License. See [LICENSE](LICENSE) for details.
+Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ---
 
