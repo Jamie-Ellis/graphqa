@@ -7,16 +7,15 @@ name = "graphqa"
 version = "1.0.0"
 description = "Natural Language Graph Analysis Framework"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "Apache-2.0"
 authors = [
-    {name = "GraphQA Team", email = "contact@graphqa.dev"}
+    {name = "Catio", email = "info@catio.tech"}
 ]
 keywords = ["graph", "analysis", "natural-language", "ai", "langchain", "embeddings"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers", 
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
