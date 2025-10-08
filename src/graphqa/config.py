@@ -170,17 +170,6 @@ class UniversalRetrieverConfig:
                     'data/datasets/amazon/meta_electronics_2018.json.gz',
                     'data/datasets/amazon/reviews_electronics_2018.json.gz'
                 ]
-            ),
-            'architecture': DatasetConfig(
-                name='Cloud Architecture',
-                description='Infrastructure components and dependencies',
-                loader_class='ArchitectureLoader',
-                enabled=True,
-                config={
-                    'architecture_file': 'data/input/architecture_states/tenant-org_9cTqhmQdCFGo8tzO-202506051140.json',  # Must be set at runtime
-                    'validate_references': True
-                },
-                data_sources=[]  # Set at runtime
             )
         }
         

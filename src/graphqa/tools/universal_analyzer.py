@@ -38,7 +38,7 @@ class UniversalNodeAnalyzer(BaseTool):
     description: str = """🔍 UNIVERSAL NODE ANALYSIS - DEEP DIVE FOR ANY DATASET
 
 Perform comprehensive analysis of individual nodes with automatic schema adaptation.
-Works seamlessly with Amazon products, cloud architecture, social networks, or any graph data.
+Works seamlessly with Amazon products, social networks, or any graph data.
 
 🎯 INTELLIGENT ANALYSIS: Automatically discovers node properties and relationships for deep insights.
 

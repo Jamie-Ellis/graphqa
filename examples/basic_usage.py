@@ -148,7 +148,7 @@ def show_next_steps():
     print("      - See existing loaders for examples")
     print("   4. Enable observability with: pip install langfuse")
     print("\n💡 Need help?")
-    print("   - GitHub Issues: https://github.com/your-org/graphqa/issues")
+    print("   - GitHub Issues: https://github.com/catio-tech/graphqa/issues")
     print("   - Documentation: docs/user-guide.md")
 
 def main():

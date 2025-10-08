@@ -37,7 +37,7 @@ class UniversalGraphQuery(BaseTool):
     description: str = """🎯 UNIVERSAL GRAPH QUERIES - ANY DATASET, ANY QUESTION
 
 Execute powerful graph analysis on any dataset using dynamic schema discovery.
-Works seamlessly with Amazon products, cloud architecture, social networks, or any graph data.
+Works seamlessly with Amazon products, social networks, or any graph data.
 
 🔧 SMART SCHEMA ADAPTATION: Automatically discovers and uses available attributes for querying.
 

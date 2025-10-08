@@ -39,7 +39,7 @@ class UniversalGraphStats(BaseTool):
     description: str = """📊 UNIVERSAL GRAPH STATISTICS - COMPREHENSIVE ANALYSIS FOR ANY DATASET
 
 Compute detailed statistics and insights from any graph dataset with automatic schema adaptation.
-Works seamlessly with Amazon products, cloud architecture, social networks, or any graph data.
+Works seamlessly with Amazon products, social networks, or any graph data.
 
 🔧 SMART SCHEMA ADAPTATION: Automatically discovers available attributes and computes relevant statistics.
 

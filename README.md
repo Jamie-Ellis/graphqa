@@ -45,7 +45,7 @@ GraphQA solves this by providing an **intelligent algorithm selection layer** th
 
 **Foundation**: GraphQA is built on [NetworkX](https://networkx.org/), the gold standard for graph analysis in Python. Your entire dataset lives in memory as a NetworkX MultiDiGraph, providing:
 
-- **⚡ Instant access** to 500+ NetworkX algorithms
+- **⚡ Instant access** to 500+ NetworkX algorithms 
 - **🔬 Research-grade implementations** (PageRank, Louvain, Dijkstra, etc.)
 - **📊 Rich data structures** supporting any graph topology
 - **🔄 Interactive analysis** with sub-second response times
@@ -195,7 +195,7 @@ This intelligent algorithm selection is what makes GraphQA special - it brings *
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/graphqa.git
+git clone https://github.com/catio-tech/graphqa.git
 cd graphqa
 
 # Run interactive setup - guides you through everything
@@ -206,7 +206,7 @@ python quickstart.py
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/graphqa.git
+git clone https://github.com/catio-tech/graphqa.git
 cd graphqa
 
 # Create virtual environment
@@ -224,7 +224,7 @@ python quickstart.py --auto
 
 ```bash
 # Clone and install manually
-git clone https://github.com/your-org/graphqa.git
+git clone https://github.com/catio-tech/graphqa.git
 cd graphqa
 
 # Create and activate virtual environment
@@ -338,7 +338,7 @@ python -m graphqa.cli
 from graphqa import GraphQA
 
 # Load any graph dataset into memory as NetworkX graph
-agent = GraphQA(dataset_name="amazon")  # or "architecture"
+agent = GraphQA(dataset_name="amazon")
 agent.load_dataset()  # Loads into NetworkX MultiDiGraph
 
 # Ask questions in natural language  
@@ -697,7 +697,6 @@ Your loader can handle **any data format**, but the output must be:
 
 GraphQA includes reference implementations you can learn from:
 - **`AmazonProductLoader`**: JSON files, product relationships, review data
-- **`ArchitectureLoader`**: Cloud infrastructure, JSON configuration files
 
 Check `src/graphqa/loaders/` for complete working examples!
 
@@ -879,7 +878,7 @@ cp config-templates/demo.yaml config.yaml
 
 1. **Check the logs**: GraphQA provides detailed logging
 2. **Try the examples**: Run files in `examples/` directory  
-3. **Open an issue**: [GitHub Issues](https://github.com/your-org/graphqa/issues)
+3. **Open an issue**: [GitHub Issues](https://github.com/catio-tech/graphqa/issues)
 
 ## 📚 Documentation
 
@@ -890,7 +889,7 @@ cp config-templates/demo.yaml config.yaml
 
 ```bash
 # Development setup
-git clone https://github.com/your-org/graphqa.git
+git clone https://github.com/catio-tech/graphqa.git
 cd graphqa
 
 # Interactive setup (recommended)

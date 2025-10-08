@@ -27,7 +27,7 @@ from .data_structures import (
 
 # Loaders
 from .loaders import (
-    BaseGraphLoader, AmazonProductLoader, ArchitectureLoader
+    BaseGraphLoader, AmazonProductLoader
 )
 
 # Universal tools
@@ -53,7 +53,7 @@ __all__ = [
     "DatasetInfo", "LoadResult", "AnalysisResult",
     
     # Loaders
-    "BaseGraphLoader", "AmazonProductLoader", "ArchitectureLoader",
+    "BaseGraphLoader", "AmazonProductLoader",
     
     # Universal tools
     "UniversalGraphExplorer", "UniversalGraphQuery", "UniversalGraphStats",
@@ -66,7 +66,7 @@ def create_agent(dataset_name: str = "amazon", **kwargs):
     Create a UniversalRetrievalAgent with sensible defaults.
     
     Args:
-        dataset_name: Dataset to load ("amazon", "architecture", etc.)
+        dataset_name: Dataset to load ("amazon", etc.)
         **kwargs: Additional arguments passed to UniversalRetrievalAgent
         
     Returns:
@@ -81,7 +81,7 @@ def load_dataset(dataset_name: str, config: dict = None):
     Load a dataset and return the graph with schema.
     
     Args:
-        dataset_name: Name of dataset ("amazon", "architecture", etc.)
+        dataset_name: Name of dataset ("amazon", etc.)
         config: Optional configuration dictionary
         
     Returns:
@@ -89,8 +89,6 @@ def load_dataset(dataset_name: str, config: dict = None):
     """
     if dataset_name == "amazon":
         loader = AmazonProductLoader(config)
-    elif dataset_name == "architecture":
-        loader = ArchitectureLoader(config)
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
     

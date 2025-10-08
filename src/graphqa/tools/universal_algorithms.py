@@ -35,7 +35,7 @@ class UniversalAlgorithmSelector(BaseTool):
     description: str = """🧠 UNIVERSAL ALGORITHM SELECTOR - INTELLIGENT ANALYSIS FOR ANY DATASET
 
 Automatically selects the best analysis algorithms and approaches based on your dataset characteristics and analysis goals.
-Works seamlessly with Amazon products, cloud architecture, social networks, or any graph data.
+Works seamlessly with Amazon products, social networks, or any graph data.
 
 🔧 SMART ALGORITHM SELECTION: Analyzes your dataset and chooses optimal algorithms for your specific goals.
 

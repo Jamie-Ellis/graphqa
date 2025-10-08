@@ -3,7 +3,7 @@ Universal Graph Retrieval Agent
 
 Production-ready agent that can analyze any graph dataset using natural language.
 Uses schema discovery and universal tools to provide intelligent analysis
-across different domains (Amazon products, cloud architecture, social networks, etc.).
+across different domains (Amazon products, social networks, etc.).
 """
 
 import json
@@ -28,7 +28,7 @@ from langchain import hub
 warnings.filterwarnings("ignore", message="Calling end() on an ended span")
 
 from .config import UniversalRetrieverConfig
-from .loaders import AmazonProductLoader, ArchitectureLoader
+from .loaders import AmazonProductLoader
 from .tools import (
     UniversalGraphExplorer,
     UniversalGraphQuery, 
@@ -48,7 +48,7 @@ class UniversalRetrievalAgent:
     Universal graph analysis agent that works with any dataset.
     
     Features:
-    - Multi-dataset support (Amazon, Architecture, and any graph data)
+    - Multi-dataset support (Amazon and any custom graph data)
     - Schema discovery and adaptive analysis
     - Natural language interface with intelligent tool selection
     - Universal tools that work across domains
@@ -66,7 +66,7 @@ class UniversalRetrievalAgent:
         Initialize the Universal Retrieval Agent.
         
         Args:
-            dataset_name: Name of dataset to load ("amazon", "architecture", etc.)
+            dataset_name: Name of dataset to load ("amazon", etc.)
             config: Configuration object (takes precedence over config_file)
             config_file: Path to YAML config file (default: look for config.yaml)
             llm_model: LLM model to use for natural language processing
@@ -138,9 +138,6 @@ class UniversalRetrievalAgent:
                 if self.dataset_name == "amazon":
                     config_dict = {"test_mode": True}  # Safe default for unknown setups
                     loader = AmazonProductLoader(config_dict)
-                elif self.dataset_name == "architecture":
-                    config_dict = {"architecture_file": "data/input/architecture_states/karate_test.json"}
-                    loader = ArchitectureLoader(config_dict)
                 else:
                     logger.error(f"Unknown dataset: {self.dataset_name}")
                     return False
@@ -150,11 +147,6 @@ class UniversalRetrievalAgent:
                 if self.dataset_name == "amazon":
                     # No longer force test_mode - respect user's config.yaml settings
                     loader = AmazonProductLoader(config_dict)
-                elif self.dataset_name == "architecture":
-                    # Provide default architecture file if not specified
-                    if not config_dict.get("architecture_file"):
-                        config_dict["architecture_file"] = "data/input/architecture_states/karate_test.json"
-                    loader = ArchitectureLoader(config_dict)
                 else:
                     logger.error(f"Unsupported dataset: {self.dataset_name}")
                     return False
@@ -539,15 +531,6 @@ Thought:{{agent_scratchpad}}"""
                 "What are the main product communities or clusters?",
                 "Which products have the most connections?",
                 "Analyze the relationship patterns in the data"
-            ]
-        elif self.dataset_name == "architecture":
-            return [
-                "What types of components do we have?",
-                "Find the most critical infrastructure components",
-                "Show me dependency relationships",
-                "What are the main architectural groups?",
-                "Identify potential single points of failure",
-                "Analyze the connectivity patterns"
             ]
         else:
             return [

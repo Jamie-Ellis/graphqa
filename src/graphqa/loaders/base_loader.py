@@ -25,7 +25,7 @@ class BaseGraphLoader(ABC):
     
     This interface standardizes how different datasets are loaded and validated,
     ensuring consistent behavior across diverse data sources like Amazon products,
-    cloud architectures, research papers, etc.
+    social networks, research papers, etc.
     
     Key Design Principles:
     1. Schema Discovery: Automatically analyze and report graph structure

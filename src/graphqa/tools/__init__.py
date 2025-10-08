@@ -2,7 +2,6 @@
 Universal Retriever Tools Package
 
 Complete set of universal graph analysis tools that work with any graph dataset.
-These tools replace architecture-specific tools with universal equivalents.
 """
 
 from .graph_explorer import UniversalGraphExplorer
@@ -32,9 +31,9 @@ ANALYSIS_TOOLS = [
     "UniversalAlgorithmSelector"
 ]
 
-# Mapping for backward compatibility with architecture-specific tools
+# Mapping for backward compatibility
 COMPATIBILITY_MAPPING = {
-    # Old architecture-specific tool name -> New universal tool
+    # Old tool name -> New universal tool
     "GraphQueryTool": "UniversalGraphQuery",
     "ComponentAnalyzer": "UniversalNodeAnalyzer", 
     "GraphStatsTool": "UniversalGraphStats",
