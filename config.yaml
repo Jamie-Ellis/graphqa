@@ -32,6 +32,22 @@ datasets:
     data_sources:
       - "data/datasets/amazon/meta_electronics_2018.json.gz"
       - "data/datasets/amazon/reviews_electronics_2018.json.gz"
+  
+  conversation_analysis:
+    name: "Conversation Analysis (REALTALK + WhatsApp)"
+    description: "Multilingual conversation analysis with semantic metadata (26,907 messages)"
+    loader_class: "ConversationAnalysisLoader"
+    enabled: true
+    config:
+      # Path to ConvoKit corpus with Phase 2 metadata (absolute path)
+      corpus_path: "/Users/jamie/Desktop/conversation-analysis/data/processed/combined_bert"
+      
+      # No test mode needed - dataset is reasonable size (26K messages)
+      # Loading takes ~10-30 seconds, ~200MB RAM
+    
+    # Expected data sources
+    data_sources:
+      - "/Users/jamie/Desktop/conversation-analysis/data/processed/combined_bert"
 
 
 # Tool Configuration
@@ -43,11 +59,14 @@ tools:
 
 # LLM Configuration  
 llm:
-  model: "gpt-4"
+  # Model options:
+  # - OpenAI: "gpt-4", "gpt-4o", "gpt-3.5-turbo"
+  # - Google: "gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"
+  model: "gemini-2.5-flash"
   temperature: 0.1
   max_tokens: 2000
-  timeout_seconds: 30
-  max_iterations: 4      # Agent reasoning steps before stopping (increase for complex questions)
+  timeout_seconds: 40
+  max_iterations: 15     # Agent reasoning steps before stopping (increased for relationship queries)
 
 # Performance & Resource Limits
 performance:

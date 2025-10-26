@@ -15,6 +15,7 @@ from pathlib import Path
 import networkx as nx
 
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain.tools import Tool
 from langchain.memory import ConversationBufferMemory
@@ -59,8 +60,8 @@ class UniversalRetrievalAgent:
                  dataset_name: str = "amazon",
                  config: Optional[UniversalRetrieverConfig] = None,
                  config_file: Optional[str] = None,
-                 llm_model: str = "gpt-4o",  # Use GPT-4o with 128k context
-                 temperature: float = 0.1,
+                 llm_model: Optional[str] = None,  # If None, read from config
+                 temperature: Optional[float] = None,  # If None, read from config
                  verbose: bool = False):
         """
         Initialize the Universal Retrieval Agent.
@@ -69,8 +70,8 @@ class UniversalRetrievalAgent:
             dataset_name: Name of dataset to load ("amazon", etc.)
             config: Configuration object (takes precedence over config_file)
             config_file: Path to YAML config file (default: look for config.yaml)
-            llm_model: LLM model to use for natural language processing
-            temperature: Temperature for LLM responses
+            llm_model: LLM model to use (default: read from config, fallback to gpt-4o)
+            temperature: Temperature for LLM responses (default: read from config, fallback to 0.1)
             verbose: Enable verbose tool output display
         """
         self.dataset_name = dataset_name
@@ -91,6 +92,12 @@ class UniversalRetrievalAgent:
                 logger.info("📋 Using built-in default configuration")
                 self.config = UniversalRetrieverConfig()
         
+        # Read LLM settings from config if not explicitly provided
+        if llm_model is None:
+            llm_model = self.config.llm.model
+        if temperature is None:
+            temperature = self.config.llm.temperature
+        
         self.verbose = verbose  # Add verbose mode for clean tool output
         self.graph = None
         self.schema = None
@@ -98,13 +105,33 @@ class UniversalRetrievalAgent:
         self.agent = None
         self.agent_executor = None
         
-        # Initialize LLM with optimized settings for large contexts
-        self.llm = ChatOpenAI(
-            model=llm_model,
-            temperature=temperature,
-            max_tokens=10000,  # Increased output limit
-            timeout=60        # Longer timeout for complex queries
-        )
+        # Initialize LLM based on model type
+        # Support both OpenAI (gpt-*) and Google (gemini-*) models
+        if llm_model.startswith("gemini"):
+            # Google Gemini models
+            import os
+            api_key = os.getenv("GOOGLE_API_KEY")
+            if not api_key:
+                raise ValueError(
+                    "GOOGLE_API_KEY not found in environment variables. "
+                    "Please set it in your .env file or environment."
+                )
+            self.llm = ChatGoogleGenerativeAI(
+                model=llm_model,
+                temperature=temperature,
+                max_output_tokens=8000,  # Gemini's max output tokens
+                google_api_key=api_key
+            )
+            logger.info(f"Using Google Gemini model: {llm_model}")
+        else:
+            # OpenAI models (default)
+            self.llm = ChatOpenAI(
+                model=llm_model,
+                temperature=temperature,
+                max_tokens=10000,  # Increased output limit
+                timeout=60        # Longer timeout for complex queries
+            )
+            logger.info(f"Using OpenAI model: {llm_model}")
         
         # Memory for conversation context (with size limit to prevent context overflow)
         self.memory = ConversationBufferMemory(
@@ -138,6 +165,10 @@ class UniversalRetrievalAgent:
                 if self.dataset_name == "amazon":
                     config_dict = {"test_mode": True}  # Safe default for unknown setups
                     loader = AmazonProductLoader(config_dict)
+                elif self.dataset_name == "conversation_analysis":
+                    config_dict = {}
+                    from .loaders import ConversationAnalysisLoader
+                    loader = ConversationAnalysisLoader(config_dict)
                 else:
                     logger.error(f"Unknown dataset: {self.dataset_name}")
                     return False
@@ -147,6 +178,9 @@ class UniversalRetrievalAgent:
                 if self.dataset_name == "amazon":
                     # No longer force test_mode - respect user's config.yaml settings
                     loader = AmazonProductLoader(config_dict)
+                elif self.dataset_name == "conversation_analysis":
+                    from .loaders import ConversationAnalysisLoader
+                    loader = ConversationAnalysisLoader(config_dict)
                 else:
                     logger.error(f"Unsupported dataset: {self.dataset_name}")
                     return False
@@ -565,4 +599,34 @@ Thought:{{agent_scratchpad}}"""
         if obs.is_enabled():
             logger.info("Flushing observability traces...")
             obs.flush()
-        logger.info("Universal Retrieval Agent shutdown complete") 
+        logger.info("Universal Retrieval Agent shutdown complete")
+
+
+# LangGraph Platform Integration
+# Export a LangGraph-compatible graph for deployment
+def _create_langgraph_graph():
+    """Create and return a LangGraph graph for the conversation analysis dataset."""
+    from langgraph.prebuilt import create_react_agent
+    from graphqa.agent import UniversalRetrievalAgent
+    
+    # Initialize GraphQA agent with conversation analysis dataset
+    print("🔄 Initializing GraphQA for LangGraph Platform...")
+    graphqa_agent = UniversalRetrievalAgent(
+        dataset_name="conversation_analysis",
+        verbose=False
+    )
+    graphqa_agent.load_dataset()
+    
+    # Convert GraphQA's LangChain tools to LangGraph-compatible format
+    # GraphQA already uses LangChain Tool format, which works with LangGraph
+    tools = graphqa_agent.tools
+    llm = graphqa_agent.llm
+    
+    # Create a ReAct agent graph using LangGraph's prebuilt function
+    graph = create_react_agent(llm, tools)
+    
+    print(f"✅ LangGraph agent created with {len(tools)} GraphQA tools")
+    return graph
+
+# Export for LangGraph Platform
+graph = _create_langgraph_graph() 
