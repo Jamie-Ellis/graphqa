@@ -1,14 +1,16 @@
 """
 Conversation Analysis Loader for GraphQA
 
-Loads ConvoKit corpus with Phase 2 metadata (message classification, 
+Loads ConvoKit corpus with Phase 2 metadata (message classification,
 topic modeling, commitment detection) into NetworkX graph for relationship analysis.
 
-Dataset: 26,907 multilingual messages (REALTALK English + WhatsApp Dutch)
-Phase 2 Metadata: 
+Dataset: 31,249 multilingual messages (REALTALK English + WhatsApp Dutch)
+Phase 2 Metadata:
   - Message Classification: questions/answers/statements (95%+ accuracy)
-  - Topic Modeling: 594 topics (289 EN + 305 NL), 28.5% topic shifts
-  - Commitment Detection: 1,801 commitments (6.7%), bilingual EN/NL
+  - Topic Modeling: 119 topics (25 REALTALK + 94 WhatsApp), 80.6% topic shifts
+    Uses separate BERTopic models per dataset with language-specific vectorizers
+  - Commitment Detection: 20,983 commitments (67.1%), separate EN/NL models
+    REALTALK: 91.5% detection rate | WhatsApp: 57.4% detection rate
 """
 
 import logging
@@ -25,8 +27,8 @@ logger = logging.getLogger(__name__)
 class ConversationAnalysisLoader(BaseGraphLoader):
     """
     Load conversation analysis data with Phase 2 metadata.
-    
-    Converts ConvoKit corpus (26,907 messages, REALTALK + WhatsApp) 
+
+    Converts ConvoKit corpus (31,249 messages, REALTALK + WhatsApp)
     to NetworkX MultiDiGraph with:
     - Person nodes (speakers with aggregated metrics)
     - Message nodes (with classification/topic/commitment metadata)
@@ -35,17 +37,26 @@ class ConversationAnalysisLoader(BaseGraphLoader):
     - TALKS_TO edges (person → person, aggregated communication patterns)
     - TOPIC_CONTINUITY edges (message → message, same topic)
     - COMMITMENT edges (person → person, commitment flows)
-    
+
     Node Types:
       - person: Speakers with aggregated communication metrics
       - message: Individual messages with Phase 2 semantic metadata
-    
+
     Edge Types:
       - SENT: Who sent which message (person → message)
       - REPLY_TO: Message reply chains (message → message)
       - TALKS_TO: Aggregated communication (person → person)
       - TOPIC_CONTINUITY: Same-topic message flows (message → message)
       - COMMITMENT: Commitment flows between speakers (person → person)
+
+    Phase 2 Metadata (Notebook 7 Updates):
+      - Topic modeling uses separate BERTopic models per dataset:
+        * REALTALK: 25 topics with English vectorizer
+        * WhatsApp: 94 topics with Dutch stopwords vectorizer
+      - Commitment detection uses separate language models:
+        * REALTALK: English model (91.5% detection rate, 0.60 threshold)
+        * WhatsApp: Dutch model (57.4% detection rate, 0.60 threshold)
+        * All commitment types normalized to English labels
     """
     
     def __init__(self, config: Dict[str, Any] = None):
@@ -143,18 +154,21 @@ class ConversationAnalysisLoader(BaseGraphLoader):
                 speaker=utt.speaker.id,
                 conversation_id=utt.conversation_id,
                 
-                # Phase 2 metadata - Message Classification (Part 1.1)
-                message_type=utt.meta.get('message_type_bertopic', 'neither'),
-                is_question=utt.meta.get('is_question_bertopic', False),
-                is_answer=utt.meta.get('is_answer_bertopic', False),
+                # Phase 2 metadata - Message Classification (Part 1.1, from notebook 06)
+                message_type=utt.meta.get('message_type', 'neither'),
+                is_question=utt.meta.get('question', False),
+                is_answer=utt.meta.get('is_answer', False),
                 
-                # Phase 2 metadata - Topic Continuity (Part 1.2)
+                # Phase 2 metadata - Topic Continuity (Part 1.2, from notebook 07)
+                # Separate models: REALTALK (25 topics) + WhatsApp (94 topics) = 119 total
                 topic_id=utt.meta.get('topic_id', -1),
                 topic_label=utt.meta.get('topic_label', 'Unknown'),
                 topic_shift=utt.meta.get('topic_shift', False),
                 topic_segment_id=utt.meta.get('topic_segment_id', 0),
                 
-                # Phase 2 metadata - Commitment Detection (Part 1.3)
+                # Phase 2 metadata - Commitment Detection (Part 1.3, from notebook 07)
+                # Separate language models: EN (91.5% detection) + NL (57.4% detection)
+                # Threshold: 0.60 confidence, types normalized to English
                 has_commitment=utt.meta.get('has_commitment_bertopic', False),
                 commitment_type=utt.meta.get('commitment_type_bertopic', None),
                 commitment_confidence=utt.meta.get('commitment_confidence_bertopic', 0.0),
@@ -194,10 +208,10 @@ class ConversationAnalysisLoader(BaseGraphLoader):
                     key = (parent.speaker.id, utt.speaker.id)
                     
                     interactions[key]['frequency'] += 1
-                    
-                    if utt.meta.get('is_question_bertopic', False):
+
+                    if utt.meta.get('question', False):
                         interactions[key]['questions'] += 1
-                    if utt.meta.get('is_answer_bertopic', False):
+                    if utt.meta.get('is_answer', False):
                         interactions[key]['answers'] += 1
                     if utt.meta.get('has_commitment_bertopic', False):
                         interactions[key]['commitments'] += 1
@@ -308,14 +322,14 @@ class ConversationAnalysisLoader(BaseGraphLoader):
         """Calculate proportion of messages that are questions"""
         if not utts:
             return 0.0
-        questions = sum(1 for u in utts if u.meta.get('is_question_bertopic', False))
+        questions = sum(1 for u in utts if u.meta.get('question', False))
         return round(questions / len(utts), 3)
     
     def _calc_answer_ratio(self, utts) -> float:
         """Calculate proportion of messages that are answers"""
         if not utts:
             return 0.0
-        answers = sum(1 for u in utts if u.meta.get('is_answer_bertopic', False))
+        answers = sum(1 for u in utts if u.meta.get('is_answer', False))
         return round(answers / len(utts), 3)
     
     def _calc_commitment_count(self, utts) -> int:
@@ -348,12 +362,15 @@ class ConversationAnalysisLoader(BaseGraphLoader):
     def get_dataset_description(self) -> str:
         """Get human-readable description of this dataset"""
         return (
-            "Multilingual conversation analysis dataset with 26,907 messages from "
-            "REALTALK (English) and WhatsApp (Dutch) corpora. Enriched with Phase 2 "
-            "semantic analysis: message classification (95%+ accuracy), topic modeling "
-            "(594 topics, 28.5% topic shifts), and commitment detection (1,801 commitments, "
-            "6.7% detection rate). Data includes speaker relationships, conversation dynamics, "
-            "and topic continuity patterns for relationship extraction and network analysis."
+            "Multilingual conversation analysis dataset with 31,249 messages from "
+            "REALTALK (English, 8,944 messages) and WhatsApp (Dutch, 22,305 messages) corpora. "
+            "Enriched with Phase 2 semantic analysis using separate language-specific models: "
+            "message classification (95%+ accuracy, 16.0% questions, 23.1% answers), "
+            "topic modeling (119 topics: 25 REALTALK + 94 WhatsApp, 80.6% topic shifts), "
+            "and commitment detection (20,983 commitments, 67.1% detection rate: "
+            "REALTALK 91.5%, WhatsApp 57.4%). "
+            "Data includes speaker relationships, conversation dynamics, and topic continuity "
+            "patterns for relationship extraction and network analysis."
         )
     
     def get_sample_queries(self) -> List[str]:

@@ -629,4 +629,20 @@ def _create_langgraph_graph():
     return graph
 
 # Export for LangGraph Platform
-graph = _create_langgraph_graph() 
+# Only create graph when running in LangGraph context (not during regular imports)
+import os
+import sys
+
+# Check if we're being imported by LangGraph CLI
+_is_langgraph_context = any(
+    'langgraph' in arg or 'langserve' in arg
+    for arg in sys.argv
+)
+
+if _is_langgraph_context or os.environ.get('LANGGRAPH_DEPLOYMENT'):
+    # Only initialize graph when running via LangGraph
+    graph = _create_langgraph_graph()
+else:
+    # For regular imports (like in Jupyter), don't create graph
+    # User should instantiate GraphQA directly instead
+    graph = None 
