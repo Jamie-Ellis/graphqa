@@ -14,10 +14,11 @@ Phase 2 Metadata:
 """
 
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 import networkx as nx
 from collections import defaultdict
+import pandas as pd
 
 from .base_loader import BaseGraphLoader, LoaderError
 
@@ -73,7 +74,52 @@ class ConversationAnalysisLoader(BaseGraphLoader):
             '../conversation-analysis/data/processed/combined_bert'
         )
         
+        # Load analysis results (communities and centrality)
+        self.analysis_results_path = Path(self.corpus_path).parent.parent / 'analysis_results'
+        self.communities = self._load_communities()
+        self.centrality = self._load_centrality()
+        
         self.logger.info(f"Conversation loader initialized: {self.corpus_path}")
+        if self.communities:
+            self.logger.info(f"   Loaded {len(self.communities)} community assignments")
+        if self.centrality:
+            self.logger.info(f"   Loaded centrality metrics for {len(self.centrality)} people")
+    
+    def _load_communities(self) -> Dict[str, int]:
+        """Load community assignments from notebook 09 results"""
+        try:
+            csv_path = self.analysis_results_path / 'community_assignments.csv'
+            if csv_path.exists():
+                df = pd.read_csv(csv_path)
+                return dict(zip(df['person'], df['community']))
+            else:
+                self.logger.warning(f"Community assignments not found: {csv_path}")
+                return {}
+        except Exception as e:
+            self.logger.warning(f"Could not load community assignments: {e}")
+            return {}
+    
+    def _load_centrality(self) -> Dict[str, Dict[str, float]]:
+        """Load centrality metrics from notebook 09 results"""
+        try:
+            csv_path = self.analysis_results_path / 'centrality_rankings.csv'
+            if csv_path.exists():
+                df = pd.read_csv(csv_path)
+                centrality_dict = {}
+                for _, row in df.iterrows():
+                    person = row['Person']  # Capital P
+                    centrality_dict[person] = {
+                        'pagerank_centrality': float(row.get('PageRank', 0.0)),
+                        'betweenness_centrality': float(row.get('Betweenness', 0.0)),
+                        'degree_centrality': float(row.get('Degree', 0.0)),
+                    }
+                return centrality_dict
+            else:
+                self.logger.warning(f"Centrality rankings not found: {csv_path}")
+                return {}
+        except Exception as e:
+            self.logger.warning(f"Could not load centrality rankings: {e}")
+            return {}
     
     def load_graph(self) -> nx.MultiDiGraph:
         """Load ConvoKit corpus and convert to NetworkX graph"""
@@ -129,6 +175,10 @@ class ConversationAnalysisLoader(BaseGraphLoader):
         for speaker in corpus.iter_speakers():
             utts = list(speaker.iter_utterances())
             
+            # Get community and centrality data
+            community = self.communities.get(speaker.id)
+            centrality_data = self.centrality.get(speaker.id, {})
+            
             graph.add_node(
                 speaker.id,
                 node_type='person',
@@ -139,7 +189,12 @@ class ConversationAnalysisLoader(BaseGraphLoader):
                 commitment_count=self._calc_commitment_count(utts),
                 avg_msg_length=self._calc_avg_length(utts),
                 dataset=self._get_dataset(utts),
-                unique_topics=self._count_unique_topics(utts)
+                unique_topics=self._count_unique_topics(utts),
+                # Phase 3 metadata - Network Analysis (from notebook 09)
+                community=community,
+                pagerank_centrality=centrality_data.get('pagerank_centrality'),
+                betweenness_centrality=centrality_data.get('betweenness_centrality'),
+                degree_centrality=centrality_data.get('degree_centrality'),
             )
     
     def _add_message_nodes(self, corpus, graph: nx.MultiDiGraph):

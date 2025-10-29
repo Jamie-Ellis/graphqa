@@ -5,34 +5,6 @@
 
 # Dataset Configurations
 datasets:
-  amazon_products:
-    name: "Amazon Products"
-    description: "Amazon product catalog and recommendation networks"
-    loader_class: "AmazonProductLoader"
-    enabled: true
-    config:
-      # Data file paths (relative to project root)
-      metadata_file: "data/datasets/amazon/meta_electronics_2018.json.gz"
-      reviews_file: "data/datasets/amazon/reviews_electronics_2018.json.gz"
-      
-      # Performance Settings
-      # ====================
-      # We ship in TEST MODE by default to prevent memory/CPU overload
-      # Set test_mode: false for full dataset (requires 1-2GB RAM, 2-5 min load time)
-      test_mode: false
-      
-      # Limits (set to null for unlimited when test_mode: false)
-      max_products: null    # Full dataset: ~200,000+ products  
-      max_reviews: null     # Full dataset: ~1,000,000+ reviews
-      
-      # Data validation
-      validate_data: true
-    
-    # Expected data sources (for validation)
-    data_sources:
-      - "data/datasets/amazon/meta_electronics_2018.json.gz"
-      - "data/datasets/amazon/reviews_electronics_2018.json.gz"
-  
   conversation_analysis:
     name: "Conversation Analysis (REALTALK + WhatsApp)"
     description: "Multilingual conversation analysis with semantic metadata (26,907 messages)"
@@ -40,14 +12,15 @@ datasets:
     enabled: true
     config:
       # Path to ConvoKit corpus with Phase 2 metadata (absolute path)
-      corpus_path: "/Users/jamie/Desktop/conversation-analysis/data/processed/combined_bert"
+      # Using forward slashes (works on Windows and Unix)
+      corpus_path: "C:/Users/jamie/Desktop/AI/Sequence/conversation-analysis/data/processed/combined_bert"
       
       # No test mode needed - dataset is reasonable size (26K messages)
       # Loading takes ~10-30 seconds, ~200MB RAM
     
     # Expected data sources
     data_sources:
-      - "/Users/jamie/Desktop/conversation-analysis/data/processed/combined_bert"
+      - "C:/Users/jamie/Desktop/AI/Sequence/conversation-analysis/data/processed/combined_bert"
 
 
 # Tool Configuration
