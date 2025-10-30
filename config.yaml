@@ -13,14 +13,14 @@ datasets:
     config:
       # Path to ConvoKit corpus with Phase 2 metadata (absolute path)
       # Using forward slashes (works on Windows and Unix)
-      corpus_path: "C:/Users/jamie/Desktop/AI/Sequence/conversation-analysis/data/processed/combined_bert"
+      corpus_path: "../conversation-analysis/data/processed/combined_bert"
       
       # No test mode needed - dataset is reasonable size (26K messages)
       # Loading takes ~10-30 seconds, ~200MB RAM
     
     # Expected data sources
     data_sources:
-      - "C:/Users/jamie/Desktop/AI/Sequence/conversation-analysis/data/processed/combined_bert"
+      - "../conversation-analysis/data/processed/combined_bert"
 
 
 # Tool Configuration
